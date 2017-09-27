@@ -24,8 +24,8 @@ df = pd.DataFrame(x_scaled)
 
 # Randomly select features
 names = list(df.drop([58],1).columns.values)
-dset = random.sample(names, 23)
-dset1 = random.sample(names, 24)
+dset = random.sample(names, 28)
+dset1 = random.sample(names, 29)
 
 X = np.array(df[dset])
 X1 = np.array(df[dset1])
