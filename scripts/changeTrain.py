@@ -9,10 +9,10 @@ from sklearn.naive_bayes import BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from time import time
+from sklearn.metrics import accuracy_score, mean_squared_error, average_precision_score
 
 
 
-# load dataset to padas dataframe
 csv_filename="OnlineNewsPopularity.csv"
 
 df=pd.read_csv(csv_filename)
@@ -24,10 +24,14 @@ df.loc[popular,'shares'] = 1
 df.loc[unpopular,'shares'] = 0
 
 
-# split original dataset into 60% training and 40% testing
 features=list(df.columns[2:60])
 X_train, X_test, y_train, y_test = model_selection.train_test_split(df[features], df['shares'], test_size=0.4, random_state=0)
 
+print "RandomForest"
+rf1 = RandomForestClassifier(n_estimators=100,n_jobs=-1, criterion="entropy")
+clf_rf1 = rf1.fit(X_train,y_train)
+score_rf1=clf_rf1.score(X_test,y_test)
+print "Acurracy: ", score_rf1
 
 # increasingly add size of training set 5% of orginal, keep testing size unchanged
 for i in range(0,100,5):
