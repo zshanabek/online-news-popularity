@@ -8,12 +8,12 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import model_selection, metrics
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
 from sklearn import preprocessing
 from time import time
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
 from sklearn.metrics import accuracy_score, mean_squared_error, average_precision_score
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.feature_selection import SelectFromModel
+from sklearn.model_selection import cross_val_score
 
 csv_filename="OnlineNewsPopularity.csv"
 
@@ -28,15 +28,38 @@ df.loc[unpopular,'shares'] = 0
 features=list(df.columns[2:60])
 
 X = df[features]
-norm_x = preprocessing.normalize(X)
-scale_x = preprocessing.scale(norm_x)
+
 y = df['shares']
 
-scale_x.shape
-X_new = SelectKBest(chi2, k=2).fit_transform(X, y)
-X_new.shape
-print(X_new)
-# X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.4)
 
-# rf = RandomForestClassifier(n_estimators=1100, criterion="entropy")
-# clf_rf = rf.fit(X_train,y_train)
+clf = ExtraTreesClassifier()
+clf = clf.fit(X, y)
+clf.feature_importances_  
+
+model = SelectFromModel(clf, prefit=True)
+X_new = model.transform(X)
+print(X_new.shape)          
+
+feature_names = X.columns.values
+mask = model.get_support() #list of booleans
+new_features = [] # The list of your K best features
+
+for bool, feature in zip(mask, feature_names):
+    if bool:
+        new_features.append(feature)
+print(new_features)
+
+X_train, X_test, y_train, y_test = model_selection.train_test_split(X_new, df['shares'], test_size=0.4, random_state=0)
+
+
+rf = RandomForestClassifier(n_estimators=100,n_jobs=-1, criterion="gini")
+
+scores = []
+scores = cross_val_score(rf, df[features], df['shares'], cv=5, n_jobs=-1)
+
+
+rf.fit(X_train, y_train)
+
+y_pred = rf.predict(X_test)
+print(accuracy_score(y_test,y_pred))
+print(scores)

@@ -41,6 +41,13 @@ for smp in range(0,20):
 
 print scores_set
 
+from sklearn.model_selection import cross_val_score
+
+rf = RandomForestClassifier(n_estimators=100,n_jobs=-1, criterion="entropy")
+
+scores = []
+scores = cross_val_score(rf, df[features], df['shares'], cv=5)
+
 x =np.array(range(0,20))
 z = np.array(list(scores_set))
 
