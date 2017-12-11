@@ -2,6 +2,7 @@ import os
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
 import pandas as pd
 import numpy as np
+from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn import model_selection, metrics
 from sklearn.ensemble import RandomForestClassifier
@@ -9,10 +10,11 @@ from sklearn.naive_bayes import BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from time import time
-from sklearn.metrics import accuracy_score, mean_squared_error, average_precision_score
 import xlsxwriter
 
 
+
+# load dataset to padas dataframe
 csv_filename="OnlineNewsPopularity.csv"
 
 df=pd.read_csv(csv_filename)
@@ -24,9 +26,12 @@ df.loc[popular,'shares'] = 1
 df.loc[unpopular,'shares'] = 0
 
 
+# split original dataset into 60% training and 40% testing
 features=list(df.columns[2:60])
 X_train, X_test, y_train, y_test = model_selection.train_test_split(df[features], df['shares'], test_size=0.4, random_state=0)
 
+
+# open one ouput excel file and two worksheets
 workbook = xlsxwriter.Workbook('changeTrain_output.xlsx')
 
 worksheet = workbook.add_worksheet()
@@ -35,6 +40,7 @@ worksheet.write("B1","DecisionTree")
 worksheet.write("C1","KNN")
 worksheet.write("D1","RandomForest")
 worksheet.write("E1","NaiveBayes")
+worksheet.write("F1","LogisticRegression")
 
 worksheet2 = workbook.add_worksheet()
 worksheet2.write("A1","scala_index")
@@ -42,12 +48,8 @@ worksheet2.write("B1","DecisionTree")
 worksheet2.write("C1","KNN")
 worksheet2.write("D1","RandomForest")
 worksheet2.write("E1","NaiveBayes")
+worksheet2.write("F1","LogisticRegression")
 
-print "RandomForest"
-rf1 = RandomForestClassifier(n_estimators=100,n_jobs=-1, criterion="entropy")
-clf_rf1 = rf1.fit(X_train,y_train)
-score_rf1=clf_rf1.score(X_test,y_test)
-print "Acurracy: ", score_rf1
 
 # increasingly add size of training set 5% of orginal, keep testing size unchanged
 for i in range(0,100,5):
@@ -98,7 +100,17 @@ for i in range(0,100,5):
 	dur_nb=t5-t4
 	print "time elapsed: ", dur_nb
 
-	# write result data to excel file
+
+	t6=time()
+	print "Regression"	
+	logreg = linear_model.LogisticRegression(C=1e5)
+	reg = logreg.fit(X_trian_part, y_train_part)
+	score_logreg=reg.score(X_test,y_test)	
+	print "Acurracy: ", score_logreg	
+	t7=time()
+	dur_reg = t7-t6
+	print "time elapsed: ", dur_reg	
+# write result data to excel file
 	list1=[]
 	list2=[]
 
@@ -107,16 +119,17 @@ for i in range(0,100,5):
 	list1.append(score_knn)
 	list1.append(score_rf)
 	list1.append(score_nb)
+	list1.append(score_logreg)
 
 	list2.append(i/100.0+0.05)
 	list2.append(dur_dt)
 	list2.append(dur_knn)
 	list2.append(dur_rf)
 	list2.append(dur_nb)
+	list2.append(dur_reg)	
 
 	for col in range(len(list1)):
 		worksheet.write(i/5+1,col,list1[col])
 		worksheet2.write(i/5+1,col,list2[col])
 
 workbook.close()
-

@@ -28,7 +28,7 @@ X_train, X_test, y_train, y_test = model_selection.train_test_split(df[features]
 
 k_range = range(1,1300,100)
 k_scores = []
-
+ks= []
 iteration = 1
 cls = []
 
@@ -36,17 +36,13 @@ for k in k_range:
     rf = RandomForestClassifier(n_estimators=k)
     scores = cross_val_score(rf, X_train, y_train)
     k_scores.append(scores.mean())
+    ks.append(k)
     print k
     print scores.mean()
 
 print(k_scores)
+print(ks)
 
 
 
 
-# plt.plot(x, z)
-# plt.xlabel('Value of K for Random Forest')
-# plt.ylabel('Cross-validated accuracy')
-# plt.show()
-# y_pred = clfs[40].predict(X_test)
-# print(accuracy_score(y_test, y_pred))

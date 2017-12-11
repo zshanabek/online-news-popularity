@@ -5,12 +5,13 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import model_selection, metrics
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import BernoulliNB
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
+from sklearn import preprocessing
 from time import time
 from sklearn.metrics import accuracy_score, mean_squared_error, average_precision_score
+import xlsxwriter
 import matplotlib.pyplot as plt
+from sklearn import tree
 
 csv_filename="OnlineNewsPopularity.csv"
 
@@ -22,23 +23,14 @@ unpopular = df.shares < 1400
 df.loc[popular,'shares'] = 1
 df.loc[unpopular,'shares'] = 0
 
-
 features=list(df.columns[2:60])
-X_train1, X_test, y_train1, y_test = model_selection.train_test_split(df[features], df['shares'], test_size=0.4, random_state=0)
 
-scores_set = []
-for smp in range(0,20):
-    
-    X_train, X_test, y_train, y_test = train_test_split(X_train1, y_train1, random_state=smp, test_size=0.5)
+X = df[features]
+y = df['shares']
 
-    rf = RandomForestClassifier(n_estimators=100,n_jobs=-1, criterion="entropy")
+X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.4)
 
-    rf.fit(X_train, y_train)
+rf = tree.DecisionTreeClassifier(criterion="entropy")
+clf = rf.fit(X_train,y_train)
 
-    y_pred = rf.predict(X_test)
-
-    scores_set.append(accuracy_score(y_test,y_pred))
-
-print scores_set
-
-
+tree.export_graphviz(clf, out_file='tree.dot')     
