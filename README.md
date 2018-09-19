@@ -1,7 +1,7 @@
 # online-news-popularity-ml
 
 The goal is to identify whether online news post will be popular or unpopular using famous pattern recognition algorithms.
-Zhunissai Shanabek, Computer Science
+Zhunisali Shanabek, Computer Science
 Suleyman Demirel University
 
 
